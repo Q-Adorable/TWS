@@ -1,0 +1,36 @@
+.contact-avatar {
+    color: #f56a00;
+    background-color: #fde3cf;
+    cursor: pointer;
+}
+
+.evaluation-diary {
+    text-align: right;
+}
+
+.show-all-content {
+    cursor: pointer;
+    color: #108ee9;
+}
+
+.avatar-position {
+    /*margin-top: 10px;*/
+}
+
+.avatar-position .ant-avatar-lg {
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 40px;
+}
+
+.contact-avatar-name{
+    font-size: 17px;
+    text-align: center;
+    padding-top: 10px;
+    margin-left: -3px;
+}
+.contact-name {
+    font-size: 17px;
+    text-align: center;
+}

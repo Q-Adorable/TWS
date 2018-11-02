@@ -1,0 +1,1 @@
+ALTER TABLE onlineLanguageQuiz ADD column `stackId` int(11)

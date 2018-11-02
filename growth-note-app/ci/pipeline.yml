@@ -1,0 +1,146 @@
+resource_types:
+- name: npm-cache
+  type: docker-image
+  source:
+    repository: ymedlop/npm-cache-resource
+    tag: latest
+    registry_mirror: ((registry_mirror))
+
+- name: kubernetes
+  type: docker-image
+  source:
+    repository: zlabjp/kubernetes-resource
+    tag: "1.9"
+    registry_mirror: ((registry_mirror))
+
+resources:
+- name: git-resource
+  type: git
+  source: &repo-source
+    uri: git@gitee.com:tws-system/growth-note-app.git
+    branch: master
+    private_key: ((concourse-repo-private-key))
+  check_every: 1m
+
+- name: dependency-cached
+  type: npm-cache
+  source:
+    <<: *repo-source
+    paths:
+      - web/package.json
+    project-path: web
+    registry-url: http://ec2-54-222-235-15.cn-north-1.compute.amazonaws.com.cn:8081/repository/tws-npm-repo/
+
+- name: version
+  type: semver
+  source:
+    driver: git
+    uri: git@gitee.com:tws-system/semver.git
+    branch: master
+    file: tws-growth-note-app
+    initial_version: 1.0.0
+    private_key: ((concourse-repo-private-key))
+    depth: 2
+
+- name: docker-image
+  type: docker-image
+  source:
+    username: ((harbor_username))
+    password: ((harbor_password))
+    insecure_registries: ["52.81.18.101"]
+    registry_mirror: ((registry_mirror))
+    repository: "52.81.18.101/tws/tws-growth-note-api"
+
+- name: web-docker-image
+  type: docker-image
+  source:
+    username: ((harbor_username))
+    password: ((harbor_password))
+    insecure_registries: ["52.81.18.101"]
+    registry_mirror: ((registry_mirror))
+    repository: "52.81.18.101/tws/tws-growth-note-web"
+
+- name: kubernetes
+  type: kubernetes
+  source:
+    server: ((prod-kubernetes-server))
+    token: ((prod-kubernetes-token))
+    certificate_authority: ((prod-certificate_authority))
+
+jobs:
+- name: Install dependencies
+  plan:
+  - get: git-resource
+    trigger: true
+  - get: dependency-cached
+  - put: version
+    params: {bump: patch}
+
+- name: Npm build
+  plan:
+  - get: git-resource
+    trigger: true
+    passed: [Install dependencies]
+  - get: dependency-cached
+    passed: [Install dependencies]
+  - get: version
+    passed: [Install dependencies]
+  - task: npm-build
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: node
+          tag: 8.11.0-alpine
+          registry_mirror: ((registry_mirror))
+      inputs:
+        - name: git-resource
+        - name: version
+        - name: dependency-cached
+      run:
+        path: git-resource/ci/build-web.sh
+      outputs:
+        - name: build-web
+  - put: web-docker-image
+    params:
+      tag_as_latest: true
+      tag: version/number
+      build: build-web
+
+- name: Gradle build
+  plan:
+  - get: git-resource
+    trigger: true
+    passed: [Npm build]
+  - get: version
+    passed: [Install dependencies]
+  - task: gradle-build
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: "52.81.18.101/library/gradle"
+          tag: 4.5-jdk8-alpine
+          insecure_registries: ["52.81.18.101"]
+      inputs:
+        - name: git-resource
+        - name: version
+      run:
+        path: git-resource/ci/build-api.sh
+      outputs:
+        - name: build
+  - put: docker-image
+    params:
+      tag_as_latest: true
+      tag: version/number
+      build: build
+  - put: kubernetes
+    params:
+      kubectl: apply -f build/deployment.staging.yml --record
+      wait_until_ready: 0
+  - put: kubernetes
+    params:
+      kubectl: apply -f build/deployment.production.yml --record
+      wait_until_ready: 0

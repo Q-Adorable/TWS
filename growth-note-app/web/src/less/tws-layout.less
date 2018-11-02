@@ -1,0 +1,74 @@
+@page-background: #ececec;
+@content-background: #FFF;
+@head-background: #595959;
+@gap: 8px;
+@times: 1, 2, 3, 4, 5, 6;
+
+body {
+  background: @page-background;
+}
+
+.header-button {
+  margin-top: 20px;
+}
+
+.main-wrapper {
+  margin: 0 48px;
+  border-radius: 4px;
+  padding: 24px 0 0;
+  margin-bottom: 24px;
+  background: @content-background;
+}
+
+.App-logo {
+  height: 60px;
+
+}
+
+.App-header {
+  background: @head-background;
+  padding: 24px 48px 0 48px;
+  color: white;
+  height: auto;
+}
+
+.logo {
+  float: left;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.make-gap-classes(@i: length(@times)) when (@i > 0) {
+  .make-gap-classes(@i - 1);
+  @time: extract(@times, @i);
+  .margin-l-@{time} {
+    margin-left: @gap * @time;
+  }
+
+  .margin-r-@{time} {
+    margin-right: @gap * @time;
+  }
+
+  .margin-t-@{time} {
+    margin-top: @gap * @time;
+  }
+
+  .margin-b-@{time} {
+    margin-bottom: @gap * @time;
+  }
+}
+
+.make-gap-classes();
+
+.mark-down-wrap {
+  padding: @gap*2;
+  background: #fbfbfb;
+  border: #e9e9e9 1px solid;
+  border-radius: 4px;
+}

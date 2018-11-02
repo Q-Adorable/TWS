@@ -1,0 +1,11 @@
+public class demo {
+    // change the function here
+    public static String func(String a){
+
+    }
+    public static void main(String[] args) {
+        // change here
+        String result = func(args[0]);
+        System.out.println(result);
+    }
+}

@@ -1,0 +1,10 @@
+[
+    {
+        "input":"a",
+        "expectedOutput":"b"
+    },
+    {
+        "input":"c",
+        "expectedOutput":"d"
+    }
+]

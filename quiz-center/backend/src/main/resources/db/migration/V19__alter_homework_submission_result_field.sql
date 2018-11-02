@@ -1,0 +1,1 @@
+ALTER TABLE homeworkSubmission modify column result varchar(10000)

@@ -1,0 +1,1 @@
+ALTER TABLE homeworkSubmission MODIFY COLUMN result text;

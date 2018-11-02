@@ -1,0 +1,68 @@
+@import "./gaps.less";
+@import "./colors.less";
+
+body {
+  background: @page-background;
+}
+
+.tws-card {
+  .ant-card-head {
+    background: @gray;
+  }
+
+  &--primary {
+    .ant-card-head {
+      background: @primary-1;
+    }
+  }
+}
+
+.header-button {
+  margin-top: 20px;
+}
+
+.main-wrapper {
+  border-radius: 4px;
+  padding: 24px 0 0;
+  margin: 0 48px 24px;
+  background: @white;
+}
+
+.App-logo {
+  height: 60px;
+
+}
+
+.App-header {
+  background: @black;
+  padding: 24px 48px!important;
+  height: auto;
+}
+
+.logo {
+  float: left;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.comment-title-icon {
+  float: right;
+	margin: 5px 
+}
+.ant-divider-dashed{
+  border-top: 2px dashed #e8e8e8!important
+}
+.comment-title-icon-group {
+	font-size: 15px;
+	cursor: pointer;
+}
+
+.comment-title-icon-group:hover {
+	color: #0086b3;
+}

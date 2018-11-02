@@ -1,0 +1,1 @@
+UPDATE `practiseDiary` SET `diaryType`='diary' WHERE `diaryType`!='goal' OR `diaryType`='' OR `diaryType` IS NULL;

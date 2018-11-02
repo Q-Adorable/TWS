@@ -1,0 +1,47 @@
+@gap: 8px;
+@times: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
+
+@gap-0: 0;
+@gap-1: @gap;
+@gap-2: @gap * 2;
+@gap-3: @gap * 3;
+@gap-4: @gap * 4;
+@gap-5: @gap * 5;
+@gap-6: @gap * 6;
+@gap-7: @gap * 7;
+@gap-8: @gap * 8;
+@gap-9: @gap * 9;
+@gap-10: @gap * 10;
+
+.make-gap-classes(@i: length(@times)) when (@i > 0) {
+  .make-gap-classes(@i - 1);
+  @time: extract(@times, @i);
+
+  .margin-l-@{time} {
+    margin-left: @gap * @time;
+  }
+
+  .margin-r-@{time} {
+    margin-right: @gap * @time;
+  }
+
+  .margin-t-@{time} {
+    margin-top: @gap * @time;
+  }
+
+  .margin-b-@{time} {
+    margin-bottom: @gap * @time;
+  }
+
+  .padding-b-@{time} {
+    padding-bottom: @gap * @time;
+  }
+}
+
+.make-gap-classes();
+
+.tws-btn-group {
+  button + button {
+    margin-left: @gap;
+  }
+}

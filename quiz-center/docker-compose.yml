@@ -1,0 +1,36 @@
+version: '2'
+services:
+  quiz-center-mysql:
+        image: mysql:5.7
+        container_name: mysql
+        ports:
+          - 3306:3306
+        environment:
+          - LANG=C.UTF-8
+          - TERM=dumb
+          - MYSQL_ROOT_PASSWORD=root
+          - MYSQL_DATABASE=QuizCenter
+          - MYSQL_PASSWORD=pass
+          - MYSQL_USER=root
+        networks:
+          main:
+            aliases:
+              - mysql
+  quiz-center-mysql-test:
+        image: mysql:5.7
+        container_name: quiz_center_mysql_test
+        ports:
+          - 3310:3306
+        environment:
+          - LANG=C.UTF-8
+          - TERM=dumb
+          - MYSQL_ROOT_PASSWORD=root
+          - MYSQL_DATABASE=BronzeSwordTest
+          - MYSQL_PASSWORD=root
+          - MYSQL_USER=root
+        networks:
+          main:
+            aliases:
+              - quiz_center_mysql_test
+networks:
+  main:

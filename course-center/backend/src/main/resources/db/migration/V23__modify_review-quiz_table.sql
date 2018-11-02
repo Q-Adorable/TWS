@@ -1,0 +1,1 @@
+ALTER TABLE reviewQuiz add column supplement varchar (10000);

@@ -1,0 +1,1 @@
+ALTER TABLE `practiseDiary` ADD `diaryType` VARCHAR(20);

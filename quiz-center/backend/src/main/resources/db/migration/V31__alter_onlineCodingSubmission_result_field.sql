@@ -1,0 +1,1 @@
+ALTER TABLE onlineCodingSubmission modify column result TEXT

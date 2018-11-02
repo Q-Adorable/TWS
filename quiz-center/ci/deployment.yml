@@ -1,0 +1,116 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: tws-quiz-center
+  namespace: APP_NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: tws-quiz-center
+  template:
+    metadata:
+      namespace: APP_NAMESPACE
+      labels:
+        k8s-app: tws-quiz-center
+    spec:
+      imagePullSecrets:
+      - name: IMAGE_PULL_SECRETS
+      containers:
+      - image: 52.81.18.101/tws/tws-quiz-center-web:DOCKER_VERSION
+        name: tws-quiz-center
+        env:
+        - name: APP_VERSION
+          value: DOCKER_VERSION
+        ports:
+        - containerPort: 80
+      - image: 52.81.18.101/tws/tws-quiz-center-api:DOCKER_VERSION
+        name: tws-quiz-center-api
+        env:
+        - name: APP_VERSION
+          value: DOCKER_VERSION
+        - name: SPRING_PROFILES_ACTIVE
+          value: APP_NAMESPACE
+      - image: 52.81.18.101/tws/jenkins:2.60.3-V13
+        name: tws-quiz-center-jenkins
+        volumeMounts:
+          - mountPath: /var/run/docker.sock
+            name: docker-sock
+          - mountPath: /usr/local/bin/docker
+            name: docker
+          - mountPath: /usr/bin/openssl
+            name: openssl
+          - mountPath: /lib64/ld-linux-x86-64.so.2
+            name: ld-linux-x86-64
+          - mountPath: /lib/x86_64-linux-gnu/libpthread.so.0
+            name: libpthread
+          - mountPath: /usr/lib/x86_64-linux-gnu/libltdl.so.7
+            name: libltdl
+          - mountPath: /lib/x86_64-linux-gnu/libc.so.6
+            name: libc
+          - mountPath: /lib/x86_64-linux-gnu/libdl.so.2
+            name: libdl
+          - mountPath: /var/jenkins_home
+            name: nfs-job-jenkins
+        ports:
+        - containerPort: 8080
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: docker
+        hostPath:
+          path: /usr/local/bin/docker
+      - name: openssl
+        hostPath:
+          path: /usr/bin/openssl
+      - name: ld-linux-x86-64
+        hostPath:
+          path: /lib64/ld-linux-x86-64.so.2
+      - name: libpthread
+        hostPath:
+          path: /lib/x86_64-linux-gnu/libpthread.so.0
+      - name: libltdl
+        hostPath:
+          path: /usr/lib/x86_64-linux-gnu/libltdl.so.7
+      - name: libc
+        hostPath:
+          path: /lib/x86_64-linux-gnu/libc.so.6
+      - name: libdl
+        hostPath:
+          path: /lib/x86_64-linux-gnu/libdl.so.2
+      - name: nfs-job-jenkins
+        persistentVolumeClaim:
+          claimName: nfs-job-jenkins
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: APP_NAMESPACE
+  name: tws-quiz-center
+spec:
+  selector:
+    k8s-app: tws-quiz-center
+  ports:
+  - name: nginx
+    port: 80
+    protocol: TCP
+  - name: jenkins
+    port: 8080
+    protocol: TCP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: tws-quiz-center-jenkins
+  namespace: APP_NAMESPACE
+spec:
+  rules:
+  - host: HOST_NAME
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: tws-quiz-center
+          servicePort: 8080

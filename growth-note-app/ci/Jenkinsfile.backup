@@ -1,0 +1,53 @@
+node {
+    stage('Checkout repo') {
+        git url: 'git@gitee.com:tws-system/growth-note-app.git',
+            branch: 'master',
+            credentialsId: 'git-ssh-key'
+    }
+
+    stage('Test') {
+        sh 'ci/contract-test.sh'
+    }
+    
+    stage('Sonar analysis backend') {
+        sh 'ci/sonar-analysis-backend.sh'
+    }
+
+    stage('Build web') {
+        sh 'ci/build-web.sh'
+    }
+
+    stage('Build api') {
+        sh 'ci/build-api.sh'
+    }
+
+    stage('Gen image') {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'harbor-credential',
+usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+            sh 'ci/gen-image.sh'
+        }
+        
+    }
+
+    stage('Gen k8s') {
+        dir('ci'){
+            sh './gen-k8s-yml.sh'
+        }
+    }
+
+    stage('Deploy to staging') {
+        withCredentials([[$class: 'FileBinding', credentialsId: 'kube_config_file', variable: 'KUBECTL_CONFIG_FILE']]) {
+            sh 'kubectl --kubeconfig=$KUBECTL_CONFIG_FILE apply -f ci/deployment.staging.yml'
+        }
+    }
+
+    stage('input') {
+        input('Do you want to proceed?')
+    }
+
+    stage('Deploy to production') {
+        withCredentials([[$class: 'FileBinding', credentialsId: 'kube_config_file', variable: 'KUBECTL_CONFIG_FILE']]) {
+            sh 'kubectl --kubeconfig=$KUBECTL_CONFIG_FILE apply -f ci/deployment.production.yml'
+        }
+    }
+}

@@ -1,0 +1,5 @@
+task:
+  - id: 1
+assignment:
+  - id: 1
+    taskId: 1

@@ -1,0 +1,10 @@
+.idea/
+out
+build
+*.iml
+node_modules
+*.log
+.gradle
+web/public/editor-md/
+.DS_Store
+backend/bin

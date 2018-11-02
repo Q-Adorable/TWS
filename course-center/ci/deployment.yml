@@ -1,0 +1,65 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: tws-course-center
+  namespace: APP_NAMESPACE
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      k8s-app: tws-course-center
+  template:
+    metadata:
+      namespace: APP_NAMESPACE
+      labels:
+        k8s-app: tws-course-center
+    spec:
+      imagePullSecrets:
+      - name: IMAGE_PULL_SECRETS
+      containers:
+      - image: 52.81.18.101/tws/tws-course-center-web:DOCKER_VERSION
+        name: tws-course-center
+        env:
+        - name: APP_VERSION
+          value: DOCKER_VERSION
+        ports:
+        - containerPort: 80
+      - image: 52.81.18.101/tws/tws-course-center-api:DOCKER_VERSION
+        name: tws-course-center-api
+        env:
+        - name: APP_VERSION
+          value: DOCKER_VERSION
+        - name: SPRING_PROFILES_ACTIVE
+          value: APP_NAMESPACE
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60 ## equals to the maximum startup time of the application + couple of seconds
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: APP_NAMESPACE
+  name: tws-course-center
+spec:
+  selector:
+    k8s-app: tws-course-center
+  ports:
+  - name: nginx
+    port: 80
+    protocol: TCP

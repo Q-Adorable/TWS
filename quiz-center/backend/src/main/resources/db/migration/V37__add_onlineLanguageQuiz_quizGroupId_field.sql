@@ -1,0 +1,1 @@
+ALTER TABLE onlineLanguageQuiz ADD column `quizGroupId` int(11)

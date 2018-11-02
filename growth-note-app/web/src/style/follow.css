@@ -1,0 +1,28 @@
+.calendar__button{
+    border: 0;
+    padding-left: 0;
+    margin-bottom: 7px;
+    height: 20px;
+    width: 100%;
+    text-align: left;
+}
+
+.calendar__button--goal{
+    background-color: #00bcd473;
+}
+
+.notes--month {
+    text-align: center;
+    font-size: 18px;
+}
+
+.ant-popover-inner-content img{
+    max-width: 100%;
+}
+
+.monthView--popover{
+    word-wrap: break-word;
+}
+.monthView--popover img{
+    max-width: 100%;
+}

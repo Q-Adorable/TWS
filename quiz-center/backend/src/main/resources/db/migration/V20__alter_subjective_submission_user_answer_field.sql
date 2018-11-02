@@ -1,0 +1,1 @@
+ALTER TABLE subjectiveSubmission modify column userAnswer varchar(10000)

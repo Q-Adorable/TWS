@@ -1,0 +1,14 @@
+public class main
+{
+    // change here
+    public static string func(string a){
+        return a;
+    }
+
+    public static void Main(string[] args)
+    {
+        // change here
+        string result = func(args[0]);
+        System.Console.WriteLine(result);
+    }
+}

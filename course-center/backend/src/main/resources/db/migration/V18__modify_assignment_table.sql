@@ -1,0 +1,1 @@
+ALTER TABLE assignment add column title VARCHAR(100);

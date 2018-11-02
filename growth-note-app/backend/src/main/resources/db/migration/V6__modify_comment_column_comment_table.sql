@@ -1,0 +1,1 @@
+alter table comment modify column commentContent varchar(20000) ;

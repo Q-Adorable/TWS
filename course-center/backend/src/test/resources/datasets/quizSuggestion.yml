@@ -1,0 +1,13 @@
+quizSuggestion:
+  - id: 1
+    quizId: 1
+    assignmentId: 1
+  - id: 2
+    quizId: 1
+    assignmentId: 1
+  - id: 3
+    quizId: 1
+    assignmentId: 1
+  - id: 4
+    quizId: 1
+    assignmentId: 1

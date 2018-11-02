@@ -1,0 +1,1 @@
+ALTER TABLE onlineLanguageSubmission ADD column `buildNumber` int(11)

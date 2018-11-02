@@ -1,0 +1,112 @@
+podTemplate(label: 'node', namespace: 'ci',
+  containers: [
+    containerTemplate(
+      name: 'jnlp',
+      namespace: 'ci',
+      nodeSelector: 'environment=ci',
+      image: 'jenkins/jnlp-slave:3.10-1-alpine'),
+    containerTemplate(
+      name: 'node',
+      namespace: 'ci',
+      nodeSelector: 'environment=ci',
+      image: 'node:10.10.0',
+      ttyEnabled: true,
+      command: 'cat'),
+    containerTemplate(
+      name: 'docker',
+      namespace: 'ci',
+      nodeSelector: 'environment=ci',
+      image: 'docker:18.06.1-ce',
+      ttyEnabled: true,
+      command: 'cat')
+  ],
+  volumes: [
+    hostPathVolume(
+      hostPath: '/usr/share/zoneinfo/Asia/Shanghai',
+      mountPath: '/etc/localtime'),
+    hostPathVolume(
+      hostPath: '/var/run/docker.sock',
+      mountPath: '/var/run/docker.sock'),
+    hostPathVolume(
+      hostPath: '/usr/local/bin/kubectl',
+      mountPath: '/usr/local/bin/kubectl'),
+    persistentVolumeClaim(
+      claimName: 'ci-jenkins-slave',
+      mountPath: '/home/jenkins/.gradle'
+    )
+  ]) {
+
+  node('node') {
+    stage('Checkout repo') {
+      container('jnlp') {
+          git url: 'git@gitee.com:tws-system/growth-note-app.git',
+              branch: 'master',
+              credentialsId: 'git-ssh-key'
+
+      }
+    }
+
+    stage('Sonar analysis backend') {
+      container('jnlp') {
+         sh 'ci/sonar-analysis-backend.sh'
+      }
+    }
+
+    stage('Contract test') {
+      container('jnlp') {
+         sh 'ci/contract-test.sh'
+      }
+    }
+
+    stage('Sonar analysis web') {
+        container('node') {
+            sh 'ci/sonar-analysis-web.sh'
+        }
+    }
+
+    stage('Build web') {
+      container('node') {
+          sh 'ci/build-web.sh'
+      }
+    }
+
+    stage('Build api') {
+      container('jnlp') {
+          sh 'ci/build-api.sh'
+      }
+    }
+
+    stage('Gen image') {
+      container('docker') {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'harbor-credential',
+          usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+              sh 'ci/gen-image.sh'
+          }
+      }
+    }
+    stage('Gen k8s file') {
+      container('jnlp') {
+          dir('ci'){
+              sh './gen-k8s-yml.sh'
+          }
+      }
+    }
+    stage('Deploy to staging') {
+       withCredentials([[$class: 'FileBinding', credentialsId: 'kube_config_file', variable: 'KUBECTL_CONFIG_FILE']]) {
+           sh 'kubectl --kubeconfig=$KUBECTL_CONFIG_FILE apply -f ci/deployment.staging.yml'
+       }
+    }
+
+    stage('Deploy to production ?') {
+     container('jnlp') {
+          input('Do you want to proceed?')
+      }
+    }
+
+    stage('Deploy to production') {
+        withCredentials([[$class: 'FileBinding', credentialsId: 'kube_config_file', variable: 'KUBECTL_CONFIG_FILE']]) {
+            sh 'kubectl --kubeconfig=$KUBECTL_CONFIG_FILE apply -f ci/deployment.production.yml'
+        }
+    }
+  }
+}

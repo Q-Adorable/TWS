@@ -1,0 +1,1 @@
+ALTER TABLE logicSubmission modify column quizItemId int(11)

@@ -1,0 +1,118 @@
+def label = 'tws-course-conter'
+def jnlpContainer = 'jnlp'
+def nodeContainer = 'node'
+def dockerContainer = 'docker'
+podTemplate(label: label, namespace: 'ci',
+    containers: [
+        containerTemplate(
+            name: jnlpContainer,
+            namespace: 'ci',
+            nodeSelector: 'environment=ci',
+            image: 'jenkins/jnlp-slave:3.10-1-alpine'),
+        containerTemplate(
+            name: nodeContainer,
+            namespace: 'ci',
+            nodeSelector: 'environment=ci',
+            image: 'node:10.10.0', 
+            ttyEnabled: true, 
+            command: 'cat'),
+        containerTemplate(
+            name: dockerContainer,
+            namespace: 'ci',
+            nodeSelector: 'environment=ci',
+            image: 'docker:18.06.1-ce',
+            ttyEnabled: true,
+            command: 'cat')
+    ],
+    volumes: [
+        hostPathVolume(
+            hostPath: '/usr/share/zoneinfo/Asia/Shanghai', 
+            mountPath: '/etc/localtime'),
+        hostPathVolume(
+            hostPath: '/var/run/docker.sock',
+            mountPath: '/var/run/docker.sock'),
+        hostPathVolume(
+            hostPath: '/usr/local/bin/kubectl',
+            mountPath: '/usr/local/bin/kubectl'),
+        persistentVolumeClaim(
+            claimName: 'ci-jenkins-slave',
+            mountPath: '/home/jenkins/.gradle')
+    ]
+) {
+    node(label) {
+        stage('Checkout repo') {
+            git url: 'git@gitee.com:tws-system/course-center.git',
+                branch: 'master',
+                credentialsId: 'git-ssh-key'
+        }
+
+        stage('Sonar analysis backend') {
+            container(jnlpContainer) {
+                sh 'ci/sonar-analysis-backend.sh'
+            }
+        }
+
+        stage('Sonar analysis web') {
+            container(nodeContainer) {
+                sh 'ci/sonar-analysis-web.sh basicQuiz-app'
+                sh 'ci/sonar-analysis-web.sh subjective-app'
+            }
+        }
+
+        stage('Build web') {
+            container(nodeContainer) {
+                parallel(
+                    a: {
+                        sh 'ci/build-web.sh basicQuiz-app basicQuiz'
+                    },
+                    b: {
+                        sh 'ci/build-web.sh subjective-app subjectiveQuiz'
+                    }
+                )
+                sh 'cp ci/web.Dockerfile build-web/Dockerfile'
+                sh 'cp ci/default build-web/default'
+            }
+        }
+
+        stage('Build api') {
+            container(jnlpContainer) {
+                sh 'ci/build-api.sh'
+            }
+        }
+
+        stage('Gen image') {
+            container(dockerContainer) {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'harbor-credential', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]  ) {
+                    sh 'ci/gen-image.sh'
+                }
+            }
+        }
+
+        stage('Gen k8s') {
+            container(jnlpContainer) {
+                dir('ci'){
+                    sh './gen-k8s-yml.sh'
+                }
+            }
+        }
+
+        stage('Deploy to staging') {
+            withCredentials([[$class: 'FileBinding', credentialsId: 'kube_config_file', variable: 'KUBECTL_CONFIG_FILE']]) {
+                sh 'kubectl --kubeconfig=$KUBECTL_CONFIG_FILE apply -f ci/deployment.staging.yml'
+            }
+        }
+
+        stage('input') {
+            container(jnlpContainer) {
+                input('Do you want to proceed?')
+            }
+        }
+
+        stage('Deploy to production') {
+            withCredentials([[$class: 'FileBinding', credentialsId: 'kube_config_file', variable: 'KUBECTL_CONFIG_FILE']]) {
+                sh 'kubectl --kubeconfig=$KUBECTL_CONFIG_FILE apply -f ci/deployment.production.yml'
+            }
+        }
+    }
+
+}

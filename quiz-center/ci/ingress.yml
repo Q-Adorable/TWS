@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: staging-jenkins
+  namespace: staging
+spec:
+  rules:
+  - host: staging-jenkins.thoughtworks.cn
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: tws-quiz-center
+          servicePort: 8080

@@ -1,0 +1,1 @@
+ALTER TABLE homeworkSubmission ADD COLUMN commitId varchar(255);

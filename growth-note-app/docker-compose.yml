@@ -1,0 +1,37 @@
+version: '2'
+services:
+#  mysql:
+#    image: mysql:5.7
+#    container_name: PractiseDiary
+#    ports:
+#      - 3306:3306
+#    environment:
+#      - LANG=C.UTF-8
+#      - TERM=dumb
+#      - MYSQL_ROOT_PASSWORD=root
+#      - MYSQL_DATABASE=PractiseDiary
+#      - MYSQL_PASSWORD=password
+#      - MYSQL_USER=PractiseDiary
+#    networks:
+#      main:
+#        aliases:
+#          - PractiseDiary
+  mysql1:
+    image: mysql:5.7
+    container_name: PractiseDiaryTest
+    ports:
+      - 3310:3306
+    environment:
+      - LANG=C.UTF-8
+      - TERM=dumb
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=PractiseDiaryTest
+      - MYSQL_PASSWORD=password
+      - MYSQL_USER=PractiseDiaryTest
+
+    networks:
+      main:
+        aliases:
+          - PractiseDiaryTest
+networks:
+  main:

@@ -1,0 +1,64 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: tws-growth-note
+  namespace: APP_NAMESPACE
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      k8s-app: tws-growth-note
+  template:
+    metadata:
+      namespace: APP_NAMESPACE
+      labels:
+        k8s-app: tws-growth-note
+    spec:
+      containers:
+      - image: 52.81.18.101/tws/tws-growth-note-web:DOCKER_VERSION
+        name: tws-growth-note
+        env:
+        - name: APP_VERSION
+          value: DOCKER_VERSION
+        ports:
+        - containerPort: 80
+      - image: 52.81.18.101/tws/tws-growth-note-api:DOCKER_VERSION
+        name: tws-growth-note-api
+        env:
+        - name: APP_VERSION
+          value: DOCKER_VERSION
+        - name: SPRING_PROFILES_ACTIVE
+          value: APP_NAMESPACE
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+      imagePullSecrets:
+        - name: IMAGE_PULL_SECRETS
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: APP_NAMESPACE
+  name: tws-growth-note
+spec:
+  selector:
+    k8s-app: tws-growth-note
+  ports:
+  - name: nginx
+    port: 80
+    protocol: TCP

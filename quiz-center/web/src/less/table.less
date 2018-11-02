@@ -1,0 +1,46 @@
+@import "colors";
+
+.table-style {
+	table {
+		width: 100%;
+		table-layout: fixed;
+	}
+}
+
+.table-center {
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr {
+    text-align: center;
+  }
+}
+
+.homework-status-fail {
+	color: @color-error;
+}
+
+.homework-status-success {
+	color: @color-success;
+}
+
+.homework-status-waiting {
+	color: @color-warn;
+}
+
+.description-style {
+	word-break:keep-all;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+}
+
+.description-style:hover {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: visible;
+}
+
+.icon-style {
+	fontSize: 16;
+	color: #08c;
+	cursor: pointer;
+}

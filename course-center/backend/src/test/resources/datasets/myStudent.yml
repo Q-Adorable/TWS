@@ -1,0 +1,7 @@
+program:
+  - id: 1
+follow:
+  - id: 1
+    tutorId: 1
+    studentId: 2
+    programId: 1

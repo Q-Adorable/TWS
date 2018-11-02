@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: program-center
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+---
+spring:
+  profiles: staging,production
+  cloud:
+    config:
+      uri: http://tws-config-server:8888

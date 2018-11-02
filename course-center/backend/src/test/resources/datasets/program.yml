@@ -1,0 +1,43 @@
+program:
+  - id: 1
+    title: "program title"
+    createTime: "2016-09-09 00:00:00.0"
+    startTime: "2017-09-09 00:00:00.0"
+    endTime: "2017-09-09 00:00:00.0"
+    creatorId: 2
+    introduction: "program introduction"
+    category: "付费"
+  - id: 2
+    title: "program title"
+    createTime: "2016-09-09 00:00:00.0"
+    startTime: "2017-09-09 00:00:00.0"
+    endTime: "2017-09-09 00:00:00.0"
+    creatorId: 2
+    introduction: "program introduction"
+    category: "付费"
+follow:
+  - id: 1
+    tutorId: 1
+    programId: 1
+    studentId: 1
+task:
+  - id: 1
+    programId: 1
+    paperId: 1
+    topicId: 1
+    orderNumber: 1
+    title: "task title"
+    content: "task content"
+    deadLine: "2017-09-09 00:00:00.0"
+    createTime: "2016-09-09 00:00:00.0"
+    visible: 1
+    link: "http://www.baidu.com"
+    type: "必修"
+userProgram:
+  - id: 1
+    userId: 1
+    programId: 1
+tutorProgram:
+  - id: 1
+    tutorId: 1
+    programId: 1
